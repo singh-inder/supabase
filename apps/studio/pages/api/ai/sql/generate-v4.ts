@@ -155,7 +155,9 @@ async function handlePost(req: NextApiRequest, res: NextApiResponse, claims?: Jw
     error: modelError,
     promptProviderOptions,
   } = await getModel({
-    provider: 'openai',
+    // provider: 'openai',
+    // @ts-ignore
+    provider: 'gemini',
     modelEntry: getAssistantModelEntry(effectiveModel),
   })
 

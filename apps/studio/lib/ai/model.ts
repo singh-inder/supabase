@@ -1,3 +1,4 @@
+import { google } from '@ai-sdk/google'
 import { openai } from '@ai-sdk/openai'
 import { LanguageModel } from 'ai'
 
@@ -57,7 +58,11 @@ export type GetModelParams =
 export async function getModel(params: GetModelParams): Promise<ModelResponse> {
   const { provider } = params
 
-  const providerRegistry = PROVIDERS[provider]
+  const providerRegistry =
+    // @ts-ignore
+    provider !== 'gemini'
+      ? PROVIDERS[provider]
+      : { models: {}, providerOptions: {} as Record<string, any> }
   if (!providerRegistry) {
     return { error: new Error(`Unknown provider: ${provider}`) }
   }
@@ -97,6 +102,22 @@ export async function getModel(params: GetModelParams): Promise<ModelResponse> {
         providerOptions: { openai: openaiProviderOptions },
       },
       promptProviderOptions: models[chosenModelId as OpenAIModelId]?.promptProviderOptions,
+    }
+  }
+
+  if (provider === 'gemini') {
+    // eslint-disable-next-line turbo/no-undeclared-env-vars
+    if (!process.env.GEMINI_API_KEY) {
+      return { error: new Error('GEMINI_API_KEY not available') }
+    }
+    // eslint-disable-next-line turbo/no-undeclared-env-vars
+    process.env.GOOGLE_GENERATIVE_AI_API_KEY = process.env.GEMINI_API_KEY
+    return {
+      modelParams: {
+        model: google('gemini-3-flash-preview'),
+        providerOptions: undefined,
+      },
+      promptProviderOptions: undefined,
     }
   }
 

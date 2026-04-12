@@ -50,6 +50,8 @@ export const getFallbackTools = ({
               )
             : { result: [] }
 
+          console.log('getSchemaTables TOOL call result', result)
+
           return result
         } catch (error) {
           console.error('Failed to execute SQL:', error)
